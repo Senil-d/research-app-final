@@ -1,13 +1,58 @@
 const QuizResult = require('../model(user)/QuizResult');
 const User = require('../model(user)/userModel');
 const Question = require('../model(user)/QuestionModel');
+const jwt = require("jsonwebtoken");
+
+// const path = require('path');
+// const { spawn } = require('child_process');
+
+// let latestQuiz = []; 
+
+// //Function-1()
+
+// const getQuizQuestions = (req, res) => {
+//   const pyPath = path.join(__dirname, '../python/run_model.py');
+//   const python = spawn('python3', [pyPath]);
+
+//   let result = '';
+
+//   python.stdout.on('data', (data) => {
+//     result += data.toString();
+//   });
+
+//   python.stderr.on('data', (data) => {
+//     console.error(`stderr: ${data}`);
+//   });
+
+//   python.on('close', (code) => {
+//     try {
+//       const output = JSON.parse(result);
+//       const questions = output.map((q, idx) => ({
+//         id: idx + 1,
+//         problem: q.Problem,
+//         options: q.options_dict,
+//         correct: q.correct
+//       }));
+
+//       latestQuiz = questions; 
+
+//       res.json({
+//         user: { id: req.user._id, username: req.user.username },
+//         questions,
+//         scores: {},
+//         finalLevel: 'Beginner'
+//       });
+//     } catch (e) {
+//       res.status(500).json({ message: 'Invalid model output' });
+//     }
+//   });
+// };
+
 
 const path = require('path');
 const { spawn } = require('child_process');
 
-let latestQuiz = []; 
-
-//Function-1()
+let latestQuiz = [];
 
 const getQuizQuestions = (req, res) => {
   const pyPath = path.join(__dirname, '../python/run_model.py');
@@ -26,14 +71,15 @@ const getQuizQuestions = (req, res) => {
   python.on('close', (code) => {
     try {
       const output = JSON.parse(result);
+
       const questions = output.map((q, idx) => ({
         id: idx + 1,
-        problem: q.Problem,
-        options: q.options_dict,
+        problem: q.problem,         // ✅ lowercase for consistency
+        options: q.options,         // ✅ already a dict from Python
         correct: q.correct
       }));
 
-      latestQuiz = questions; // ✅ Store current quiz for evaluation
+      latestQuiz = questions;
 
       res.json({
         user: { id: req.user._id, username: req.user.username },
@@ -42,44 +88,148 @@ const getQuizQuestions = (req, res) => {
         finalLevel: 'Beginner'
       });
     } catch (e) {
+      console.error(e);
       res.status(500).json({ message: 'Invalid model output' });
     }
   });
 };
 
-const evaluateQuiz = (req, res) => {
+
+
+const decodeToken = (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    res.json({
+      success: true,
+      decoded,
+    });
+  } catch (err) {
+    res.status(401).json({
+      error: "Invalid or expired token",
+      detail: err.message,
+    });
+  }
+};
+
+const updateSkill = async (req, res) => {
+  try {
+    const { skill } = req.body;
+
+    if (!skill) {
+      return res.status(400).json({ message: "Skill is required" });
+    }
+
+    // ✅ Update user in DB
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { skill },
+      { new: true }
+    );
+
+    // ✅ Generate new token with skill included
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        specialization: user.specialization,
+        stream: user.stream,
+        skill: user.skill
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Skill updated successfully",
+      skill: user.skill,
+      token
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update skill", detail: err.message });
+  }
+};
+
+const evaluateQuiz = async (req, res) => {
   const answers = req.body.answers;
 
-  if (!answers || typeof answers !== 'object') {
-    return res.status(400).json({ message: 'Invalid answers format' });
+  if (!answers || Object.prototype.toString.call(answers) !== "[object Object]") {
+    return res.status(400).json({ message: "Invalid answers format" });
   }
 
   let score = 0;
   const results = [];
 
   for (const [questionId, userAnswer] of Object.entries(answers)) {
-    const question = latestQuiz.find(q => q.id === parseInt(questionId));
+    const question = latestQuiz.find((q) => q.id === parseInt(questionId, 10));
     if (question) {
-      const isCorrect = question.correct === userAnswer;
+      const isCorrect =
+        String(question.correct).toLowerCase() === String(userAnswer).toLowerCase();
       if (isCorrect) score += 1;
-
       results.push({
         questionId: question.id,
         correctAnswer: question.correct,
         userAnswer,
-        isCorrect
+        isCorrect,
       });
     }
   }
 
-  res.json({
-    username: req.user.username,
-    totalQuestions: latestQuiz.length,
-    attempted: Object.keys(answers).length,
-    correctAnswers: score,
-    percentage: Math.round((score / latestQuiz.length) * 100),
-    results
-  });
+  const totalQuestions = latestQuiz.length;
+  const attempted = Object.keys(answers).length;
+  const percentage =
+    totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+
+  // Determine Level
+  let level = "Beginner";
+  if (percentage > 50 && percentage < 80) level = "Intermediate";
+  else if (percentage >= 80) level = "Advanced";
+
+  // Skill
+  const skill = req.user?.skill || req.user?.specialization || "General";
+
+  // Save result in DB
+  try {
+    const quizResult = await QuizResult.create({
+      user: req.user._id,
+      username: req.user.username,
+      specialization: req.user.specialization,
+      skill,
+      level,
+      totalQuestions,
+      attempted,
+      correctAnswers: score,
+      percentage,
+      results,
+    });
+
+    // Generate new token
+    const token = jwt.sign(
+      {
+        id: req.user._id,
+        username: req.user.username,
+        specialization: req.user.specialization,
+        skill,
+        level,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      message: "Quiz evaluated & saved",
+      quizResult,
+      token,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to save quiz result", detail: err.message });
+  }
 };
 
 const submitQuizResult = async (req, res) => {
@@ -106,48 +256,25 @@ const submitQuizResult = async (req, res) => {
 
 const getUserResults = async (req, res) => {
   try {
-    const results = await QuizResult.find({ user: req.user.id }).sort({ createdAt: -1 });
-    res.json(results);
+    // req.user.id should come from your auth middleware (decoded JWT)
+    const results = await QuizResult.find({ user: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No quiz results found" });
+    }
+
+    res.json({
+      success: true,
+      count: results.length,
+      results,
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch results', error: err.message });
-  }
-};
-
-const validateAnswers = async (req, res) => {
-  try {
-    const { answers } = req.body;
-
-    if (!answers || !Array.isArray(answers)) {
-      return res.status(400).json({ message: 'Answers must be an array' });
-    }
-
-    const results = [];
-
-    for (let item of answers) {
-      const { questionId, selectedOption } = item;
-
-      const question = await Question.findById(questionId);
-      if (!question) {
-        results.push({
-          questionId,
-          correct: false,
-          message: 'Question not found',
-        });
-        continue;
-      }
-
-      const isCorrect = question.correctAnswer === selectedOption;
-      results.push({
-        questionId,
-        selectedOption,
-        correctAnswer: question.correctAnswer,
-        correct: isCorrect,
-      });
-    }
-
-    res.json({ results });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      message: "Failed to fetch results",
+      error: err.message,
+    });
   }
 };
 
@@ -222,6 +349,6 @@ const evaluateQuizF2 = (req, res) => {
 
 
 module.exports = { 
-  getQuizQuestions, submitQuizResult, getUserResults, validateAnswers, evaluateQuiz,
+  getQuizQuestions, submitQuizResult, getUserResults, evaluateQuiz, updateSkill, decodeToken,
   getF2QuizQuestions, evaluateQuizF2
  };

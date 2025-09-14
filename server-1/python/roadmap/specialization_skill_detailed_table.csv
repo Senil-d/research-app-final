@@ -1,0 +1,64 @@
+Specialization,Skill,Level,Resources
+Information Technology,Leadership,Beginner,resource 1
+Information Technology,Leadership,Intermediate,resource 2
+Information Technology,Leadership,Advanced,resource 3
+Information Technology,Problem-Solving,Beginner,resource 4
+Information Technology,Problem-Solving,Intermediate,resource 5
+Information Technology,Problem-Solving,Advanced,resource 6
+Information Technology,Analytical,Beginner,resource 7
+Information Technology,Analytical,Intermediate,resource 8
+Information Technology,Analytical,Advanced,resource 9
+Computer Systems & Network Engineering,Leadership,Beginner,resource 10
+Computer Systems & Network Engineering,Leadership,Intermediate,resource 11
+Computer Systems & Network Engineering,Leadership,Advanced,resource 12
+Computer Systems & Network Engineering,Problem-Solving,Beginner,resource 13
+Computer Systems & Network Engineering,Problem-Solving,Intermediate,resource 14
+Computer Systems & Network Engineering,Problem-Solving,Advanced,resource 15
+Computer Systems & Network Engineering,Analytical,Beginner,resource 16
+Computer Systems & Network Engineering,Analytical,Intermediate,resource 17
+Computer Systems & Network Engineering,Analytical,Advanced,resource 18
+Software Engineering,Leadership,Beginner,resource 19
+Software Engineering,Leadership,Intermediate,resource 20
+Software Engineering,Leadership,Advanced,resource 21
+Software Engineering,Problem-Solving,Beginner,resource 22
+Software Engineering,Problem-Solving,Intermediate,resource 23
+Software Engineering,Problem-Solving,Advanced,resource 24
+Software Engineering,Analytical,Beginner,resource 25
+Software Engineering,Analytical,Intermediate,resource 26
+Software Engineering,Analytical,Advanced,resource 27
+Information Systems Engineering,Leadership,Beginner,resource 28
+Information Systems Engineering,Leadership,Intermediate,resource 29
+Information Systems Engineering,Leadership,Advanced,resource 30
+Information Systems Engineering,Problem-Solving,Beginner,resource 31
+Information Systems Engineering,Problem-Solving,Intermediate,resource 32
+Information Systems Engineering,Problem-Solving,Advanced,resource 33
+Information Systems Engineering,Analytical,Beginner,resource 34
+Information Systems Engineering,Analytical,Intermediate,resource 35
+Information Systems Engineering,Analytical,Advanced,resource 36
+Cyber Security,Leadership,Beginner,resource 37
+Cyber Security,Leadership,Intermediate,resource 38
+Cyber Security,Leadership,Advanced,resource 39
+Cyber Security,Problem-Solving,Beginner,resource 40
+Cyber Security,Problem-Solving,Intermediate,resource 41
+Cyber Security,Problem-Solving,Advanced,resource 42
+Cyber Security,Analytical,Beginner,resource 43
+Cyber Security,Analytical,Intermediate,resource 44
+Cyber Security,Analytical,Advanced,resource 45
+Interactive Media,Problem-Solving,Beginner,resource 46
+Interactive Media,Problem-Solving,Intermediate,resource 47
+Interactive Media,Problem-Solving,Advanced,resource 48
+Interactive Media,Analytical,Beginner,resource 49
+Interactive Media,Analytical,Intermediate,resource 50
+Interactive Media,Analytical,Advanced,resource 51
+Data Science,Problem-Solving,Beginner,resource 52
+Data Science,Problem-Solving,Intermediate,resource 53
+Data Science,Problem-Solving,Advanced,resource 54
+Data Science,Analytical,Beginner,resource 55
+Data Science,Analytical,Intermediate,resource 56
+Data Science,Analytical,Advanced,resource 57
+Software Engineering,Artistic,Beginner,resource 58
+Software Engineering,Artistic,Intermediate,resource 59
+Software Engineering,Artistic,Advanced,resource 60
+Interactive Media,Artistic,Beginner,resource 61
+Interactive Media,Artistic,Intermediate,resource 62
+Interactive Media,Artistic,Advanced,resource 63
