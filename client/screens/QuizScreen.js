@@ -67,7 +67,7 @@ const QuizScreen = ({ route }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/quiz/evaluate`,
+        `http://192.168.8.120:5050/api/evaluate`,
         { answers: formattedAnswers },
         {
           headers: {
@@ -76,12 +76,15 @@ const QuizScreen = ({ route }) => {
         }
       );
   
-      const { correctAnswers, totalQuestions, percentage } = res.data;
-  
+      const { correctAnswers, totalQuestions, percentage, specialization, attempted } = res.data;
+
       navigation.navigate('ResultScreen', {
         correctAnswers,
         totalQuestions,
-        percentage
+        attempted,       // ✅ pass attempted
+        percentage,
+        skillName: specialization || 'Unknown',
+        requiredScore: 7
       });
     } catch (err) {
       console.error('Failed to submit answers', err.message);
@@ -394,3 +397,4 @@ const styles = StyleSheet.create({
     color: '#C7D2FE'
   }
 });
+
