@@ -1,17 +1,17 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  ActivityIndicator
+  View
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
-import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 
 const QuizScreen = ({ route }) => {
@@ -29,7 +29,7 @@ const QuizScreen = ({ route }) => {
     const loadQuestions = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const res = await axios.get(`http://192.168.8.120:5050/api/quiz`, {
+        const res = await axios.get(`http://192.168.8.105:5050/api/quiz`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -78,7 +78,7 @@ const QuizScreen = ({ route }) => {
   
       const { correctAnswers, totalQuestions, percentage } = res.data;
   
-      navigation.navigate('ResultScreen', {
+      navigation.navigate('QuizResultScreen', {
         correctAnswers,
         totalQuestions,
         percentage
