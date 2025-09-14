@@ -13,6 +13,13 @@ import { EXPO_PUBLIC_BASE_URL } from "@env";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 
+// Career Options for Assessment
+const CAREER_OPTIONS = [
+  { id: 'ui_ux', name: 'UI/UX Design', riasec: ['Artistic', 'Investigative', 'Social'] },
+  { id: 'game_design', name: 'Game Design', riasec: ['Artistic', 'Investigative', 'Realistic'] },
+  { id: 'web_development', name: 'Web Development', riasec: ['Investigative', 'Realistic', 'Conventional'] }
+];
+
 
 const SuggestedCareerScreen = ({ route, navigation }) => {
   const { stream, goal, predictedCareer } = route.params;
@@ -33,7 +40,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Save selected career
       await axios.post(
-        `http://192.168.8.120:5050/api/career/save-selection`,
+        `http://192.168.54.44:5050/api/career/save-selection`,
         {
           selectedCareer: career,
           stream,
@@ -48,7 +55,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Get career skill info
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/career-skills`,
+        `http://192.168.54.44:5050/api/career/career-skills`,
         { career },
         {
           headers: {
@@ -64,6 +71,15 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleStartAssessment = (career) => {
+    // Navigate to CareerAssessment with selected career
+    navigation.navigate("careerass", { 
+      selectedCareer: career,
+      stream,
+      goal
+    });
+  };
+
   return (
     <>
     <Header/>
@@ -75,8 +91,8 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
         <Text style={styles.subText}>Chosen Goal: {goal}</Text>
       </View>
 
-      {/* Career Cards */}
-      <Text style={styles.label}>Choose one to explore:</Text>
+      {/* Predicted Career Cards */}
+      <Text style={styles.label}>AI Predicted Careers:</Text>
       {careerOptions.map((career, index) => (
         <TouchableOpacity
           key={index}
@@ -85,6 +101,23 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
           onPress={() => handleSelectCareer(career)}
         >
           <Text style={styles.careerText}>{career}</Text>
+        </TouchableOpacity>
+      ))}
+
+      {/* Career Assessment Options */}
+      <Text style={[styles.label, { marginTop: 30 }]}>Or choose a career path for skill assessment:</Text>
+      {CAREER_OPTIONS.map((career) => (
+        <TouchableOpacity
+          key={career.id}
+          style={styles.assessmentCard}
+          activeOpacity={0.85}
+          onPress={() => handleStartAssessment(career)}
+        >
+          <Text style={styles.assessmentCardTitle}>{career.name}</Text>
+          <Text style={styles.assessmentCardSubtitle}>
+            RIASEC Types: {career.riasec.join(', ')}
+          </Text>
+          <Text style={styles.assessmentCardAction}>📝 Start Assessment</Text>
         </TouchableOpacity>
       ))}
 
@@ -167,6 +200,41 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#E5E7EB",
     textAlign: "center",
+  },
+
+  /* Assessment card → distinct style for career assessment options */
+  assessmentCard: {
+    backgroundColor: "#1e293b",
+    paddingVertical: 20,
+    paddingHorizontal: 18,
+    marginBottom: 14,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#4338ca",
+    shadowColor: "#4338ca",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+  assessmentCardTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#E1C16E",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  assessmentCardSubtitle: {
+    fontSize: 13,
+    color: "#C7D2FE",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  assessmentCardAction: {
+    fontSize: 14,
+    color: "#4cc9f0",
+    textAlign: "center",
+    fontWeight: "700",
   },
 
   /* Back button → gold primary */

@@ -78,7 +78,7 @@ export default function CareerGoalScreen({ navigation }) {
       }
 
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/suggest-career`,
+        `http://192.168.54.44:5050/api/career/suggest-career`,
         { stream, specialization: goal, knowledge },
         { headers: { Authorization: `Bearer ${token}` } }
       );
