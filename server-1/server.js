@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const careerRoutes = require('./routes/careerRoute');
 const quizResultRoutes = require('./routes/quizRoutes');
 const validateAnswerRoutes = require('./routes/quizRoutes');
+const leadershipAssessRoute = require('./routes/leadershipAssessRoute');
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use('/api/career', careerRoutes);
 
 //Function-2()
 app.use('/f2-api', quizRoutes);
+
+// Leadership Routes
+app.use('/api/leadership', leadershipAssessRoute);
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
