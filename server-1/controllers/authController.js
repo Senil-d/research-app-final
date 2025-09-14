@@ -15,49 +15,53 @@ const register = async (req, res) => {
 
 // const login = async (req, res) => {
 //     try {
-//         const { username, password } = req.body;
-//         const user = await User.findOne({ username });
-//         if (!user) {
-//             return res.status(404).send({ message: 'User not found' });
+//       const { username, password } = req.body;
+  
+//       const user = await User.findOne({ username });
+//       if (!user) {
+//         return res.status(404).send({ message: 'User not found' });
+//       }
+  
+//       const isMatch = await bcrypt.compare(password, user.password);
+//       if (!isMatch) {
+//         return res.status(400).send({ message: 'Invalid credentials' });
+//       }
+  
+//       const token = jwt.sign({ id: user._id }, 'secretKey', { expiresIn: '1h' });
+  
+//       res.json({
+//         token,
+//         user: {
+//           id: user._id,
+//           username: user.username
 //         }
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.status(400).send({ message: 'Invalid credentials' });
-//         }
-//         const token = jwt.sign({ id: user._id, role: user.role }, 'secretKey', { expiresIn: '1h' });
-//         res.json({ token, user });
+//       });
 //     } catch (error) {
-//         res.status(500).send({ message: error.message });
+//       res.status(500).send({ message: error.message });
 //     }
-// };
+//   };
 
 const login = async (req, res) => {
-    try {
-      const { username, password } = req.body;
-  
-      const user = await User.findOne({ username });
-      if (!user) {
-        return res.status(404).send({ message: 'User not found' });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).send({ message: 'Invalid credentials' });
-      }
-  
-      const token = jwt.sign({ id: user._id }, 'secretKey', { expiresIn: '1h' });
-  
-      res.json({
-        token,
-        user: {
-          id: user._id,
-          username: user.username
-        }
-      });
-    } catch (error) {
-      res.status(500).send({ message: error.message });
-    }
-  };
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+  // ✅ token without stream/specialization yet
+  const token = jwt.sign(
+    {
+      id: user._id,
+      username: user.username
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  res.json({ token, user });
+};
 
 
 const getUserById = async (req, res) => {
