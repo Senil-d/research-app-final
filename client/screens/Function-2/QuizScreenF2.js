@@ -1,110 +1,96 @@
-import React, { useEffect, useState } from 'react';
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Animated,
+  FlatList,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  ActivityIndicator
-} from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Animatable from 'react-native-animatable';
-import { useRouter } from 'expo-router';
-import Header from '../../components/Header';
+  View,
+} from "react-native";
+import * as Animatable from "react-native-animatable"; // ✅ Animations
 
-const QuizScreenF2 = () => {
-  const router = useRouter();
+const QuizScreenF2 = ({ navigation }) => {
   const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [typedQuestion, setTypedQuestion] = useState('');
-  const [showProgressModal, setShowProgressModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 Animated progress value
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    const loadQuestions = async () => {
+    const fetchQuestions = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        const res = await axios.get('http://192.168.8.120:5050/api/quiz-f2', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setQuestions(res.data.slice(0, 20));
-        setLoading(false);
-      } catch (err) {
-        console.error('Failed to load questions:', err.message);
+        const response = await axios.get(
+          "http://192.168.8.105:5050/api/quiz-f2"
+        );
+        setQuestions(response.data);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+      } finally {
         setLoading(false);
       }
     };
-    loadQuestions();
+
+    fetchQuestions();
   }, []);
 
   useEffect(() => {
     if (questions.length > 0) {
-      const current = questions[currentQuestionIndex].question_text;
-      let index = 0;
-      const interval = setInterval(() => {
-        setTypedQuestion(current.slice(0, index + 1));
-        index++;
-        if (index >= current.length) clearInterval(interval);
-      }, 20);
-      return () => clearInterval(interval);
-    }
-  }, [currentQuestionIndex, questions]);
+      const progress = ((currentIndex + 1) / questions.length) * 100;
 
-  const handleSubmitMarked = async () => {
-    const formattedAnswers = {};
-    for (let index in selectedAnswers) {
-      const questionId = questions[index].id;
-      formattedAnswers[questionId] = selectedAnswers[index];
+      Animated.timing(progressAnim, {
+        toValue: progress,
+        duration: 500,
+        useNativeDriver: false,
+      }).start();
     }
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const res = await axios.post(
-        'http://192.168.8.120:5050/api/quiz-f2/evaluate-f2',
-        { answers: formattedAnswers },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      router.push({
-        pathname: '/ResultScreen',
-        params: { finalLevel: res.data.final_level }
-      });
-    } catch (err) {
-      console.error('Failed to submit answers', err.message);
-      setLoading(false);
-      alert('Failed to evaluate quiz. Please try again.');
-    }
+  }, [currentIndex, questions.length]);
+
+  const handleSelect = (option) => {
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [questions[currentIndex].id]: option,
+    }));
   };
 
   const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      submitAnswers();
     }
   };
 
-  const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+  const submitAnswers = async () => {
+    try {
+      const response = await axios.post(
+        "http://192.168.8.105:5050/api/quiz-f2/evaluate-f2",
+        { answers: selectedAnswers }
+      );
+
+      navigation.navigate("QuizResultScreen", {
+        finalLevel: response.data.final_level,
+        overallScore: response.data.overall_score,
+        completionRate: response.data.completion_rate,
+        categoryScores: response.data.skill_profile,
+      });
+    } catch (error) {
+      console.error("Evaluation failed:", error);
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#E1C16E" />
         <Text style={styles.loadingText}>Loading questions...</Text>
       </View>
     );
-  }
 
-  if (!questions.length || !questions[currentQuestionIndex]) {
+  if (!questions.length || !questions[currentIndex]) {
     return (
       <View style={styles.container}>
         <Text style={styles.loadingText}>No questions available</Text>
@@ -112,122 +98,86 @@ const QuizScreenF2 = () => {
     );
   }
 
-  const currentQuestion = questions[currentQuestionIndex];
-  let parsedOptions;
-  try {
-    parsedOptions = JSON.parse(currentQuestion.options.replace(/'/g, '"'));
-  } catch {
-    parsedOptions = currentQuestion.options || [];
-  }
+  const currentQuestion = questions[currentIndex];
+  const options = currentQuestion.options || [];
+  const isAnswered = !!selectedAnswers[currentQuestion.id];
 
   return (
-    <>
-    <Header/>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Header with vertical dots */}
-        <View style={styles.headerRow}>
-          <View style={styles.dotsColumn}>
-            {questions.map((_, idx) => {
-              const answered = selectedAnswers[idx] !== undefined;
-              const active = idx === currentQuestionIndex;
-              return (
-                <View
-                  key={idx}
-                  style={[
-                    styles.dot,
-                    answered && styles.dotFilled,
-                    active && styles.dotActive,
-                  ]}
-                />
-              );
-            })}
-          </View>
-          <Animatable.Text animation="fadeInDown" style={styles.headerText}>
-            {currentQuestionIndex + 1}/{questions.length}
-          </Animatable.Text>
+    <View style={styles.container}>
+      {/* Category Heading with Animation */}
+      <Animatable.Text
+        key={currentQuestion.category + currentIndex} // re-animates each time
+        animation="fadeInDown"
+        duration={600}
+        style={styles.categoryHeading}
+      >
+        Category: {currentQuestion.category?.replace("_", " ")}
+      </Animatable.Text>
+
+      {/* Progress Bar */}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBarBackground}>
+          <Animated.View
+            style={[
+              styles.progressBarFill,
+              {
+                width: progressAnim.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ["0%", "100%"],
+                }),
+              },
+            ]}
+          />
         </View>
+        <Text style={styles.progressText}>
+          Question {currentIndex + 1} / {questions.length}
+        </Text>
+      </View>
 
-        {/* Question Card */}
-        <Animatable.View animation="fadeInUp" delay={200} style={styles.card}>
-          <Text style={styles.questionText}>{typedQuestion}</Text>
-          <View style={styles.optionsGrid}>
-            {Object.entries(parsedOptions).map(([key, value]) => {
-              const isSelected = selectedAnswers[currentQuestionIndex] === key;
-              return (
-                <TouchableOpacity
-                  key={key}
-                  style={[styles.optionBox, isSelected && styles.selectedOptionBox]}
-                  onPress={() =>
-                    setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: key })
-                  }
-                  disabled={loading}
-                >
-                  <Text style={styles.optionKey}>{key}</Text>
-                  <Text style={styles.optionValue}>{value}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Animatable.View>
+      {/* Question Card */}
+      <View style={styles.card}>
+        <Text style={styles.questionText}>
+          {currentIndex + 1}. {currentQuestion.question_text}
+        </Text>
 
-        {/* Nav Buttons */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            onPress={handlePrevious}
-            disabled={currentQuestionIndex === 0}
-            style={styles.navButton}
-          >
-            <Text style={styles.navButtonText1}>◀ Prev</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmitMarked} style={styles.markButton}>
-            <Text style={styles.navButtonText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleNext}
-            disabled={currentQuestionIndex === questions.length - 1}
-            style={styles.navButton}
-          >
-            <Text style={styles.navButtonText1}>Next ▶</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Progress Modal */}
-        <TouchableOpacity
-          onPress={() => setShowProgressModal(true)}
-          style={styles.progressButton}
-        >
-          <Text style={styles.navButtonText1}>Show Progress</Text>
-        </TouchableOpacity>
-        <Modal visible={showProgressModal} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.progressLabel}>Progress</Text>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[styles.progressBar, {
-                    width: `${(Object.keys(selectedAnswers).length / questions.length) * 100}%`
-                  }]}
-                />
-              </View>
-              <TouchableOpacity
-                onPress={() => setShowProgressModal(false)}
-                style={styles.navButton}
+        {/* Options */}
+        <FlatList
+          data={options}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => handleSelect(item)}
+              style={[
+                styles.optionBox,
+                selectedAnswers[currentQuestion.id] === item &&
+                  styles.selectedOptionBox,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  selectedAnswers[currentQuestion.id] === item &&
+                    styles.selectedOptionText,
+                ]}
               >
-                <Text style={styles.navButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
-        {/* Footer XP */}
-        <View style={styles.footerStatus}>
-          <Text style={styles.statusText}>
-            You Earn XP: {Object.keys(selectedAnswers).length * 5}
-          </Text>
-        </View>
-      </ScrollView>
-    </>
-    
+      {/* Navigation Button */}
+      <TouchableOpacity
+        style={[styles.navButton, !isAnswered && styles.navButtonDisabled]}
+        onPress={handleNext}
+        disabled={!isAnswered}
+      >
+        <Text style={styles.navButtonText}>
+          {currentIndex === questions.length - 1 ? "Submit" : "Next"}
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -235,181 +185,91 @@ export default QuizScreenF2;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: "#0B0B0B",
     padding: 20,
-    backgroundColor: '#070C14',
-    justifyContent: 'center'
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  
-  dotsColumn: {
-    flexDirection: 'row',
-    gap: 4,
-    marginRight: 15,
-  },
-
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#1f2b40',
-    marginVertical: 4,
-  },
-  dotFilled: {
-    backgroundColor: '#E1C16E',
-  },
-  dotActive: {
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#E1C16E',
-    textAlign: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#C7D2FE'
+    color: "#C7C7C7",
+    textAlign: "center",
+    marginTop: 12,
+  },
+  categoryHeading: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#E1C16E",
+    textAlign: "center",
+    marginTop: 120,
+    marginBottom: 50,
+    textTransform: "capitalize",
+  },
+  progressContainer: {
+    marginBottom: 80,
+  },
+  progressBarBackground: {
+    height: 14,
+    backgroundColor: "#2A2A2A",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: "#E1C16E",
+    borderRadius: 8,
+  },
+  progressText: {
+    color: "#C7C7C7",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 6,
   },
   card: {
-    backgroundColor: '#0B1220',
-    borderRadius: 20,
-    padding: 18,
+    backgroundColor: "#161616",
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 20,
-    borderWidth: 1.5,
-    borderColor: '#223149',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
   },
   questionText: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#E5E7EB',
-    marginBottom: 20,
-    textAlign: 'center'
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 10
+    fontWeight: "bold",
+    color: "#E1C16E",
+    marginBottom: 16,
+    textAlign: "center",
   },
   optionBox: {
-    width: '48%',
-    backgroundColor: '#0e1b2c',
+    backgroundColor: "#1C1C1C",
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+    borderRadius: 12,
     padding: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: '#223149'
+    marginVertical: 6,
   },
   selectedOptionBox: {
-    borderColor: '#E1C16E',
-    shadowColor: '#E1C16E',
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
+    backgroundColor: "#E1C16E",
+    borderColor: "#E1C16E",
   },
-  optionKey: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#E1C16E'
+  optionText: {
+    color: "#C7C7C7",
+    textAlign: "center",
   },
-  optionValue: {
-    fontSize: 14,
-    color: '#E5E7EB',
-    textAlign: 'center',
-    marginTop: 4
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20
+  selectedOptionText: {
+    color: "#0B0B0B",
+    fontWeight: "bold",
   },
   navButton: {
-    backgroundColor: '#0e1b2c',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: "#E1C16E",
+    paddingVertical: 14,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#E1C16E'
+    alignItems: "center",
+  },
+  navButtonDisabled: {
+    backgroundColor: "#3A3A3A",
   },
   navButtonText: {
-    fontWeight: '500',
+    color: "#0B0B0B",
+    fontWeight: "bold",
     fontSize: 16,
-
   },
-
-  navButtonText1: {
-    color: '#E1C16E',
-    fontWeight: '500',
-    fontSize: 16
-  },
-  markButton: {
-    backgroundColor: '#E1C16E',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12
-  },
-  progressButton: {
-    alignSelf: 'center',
-    backgroundColor: '#0B1220',
-    borderWidth: 2,
-    borderColor: '#E1C16E',
-    padding: 12,
-    borderRadius: 12,
-    marginVertical: 15
-  },
-  progressLabel: {
-    fontSize: 16,
-    color: '#E1C16E',
-    marginBottom: 8,
-    fontWeight: '700',
-    textAlign: 'center'
-  },
-  progressBarContainer: {
-    height: 18,
-    backgroundColor: '#1F2937',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 20
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#E1C16E'
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  modalContent: {
-    backgroundColor: '#0B1220',
-    padding: 30,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#223149',
-    width: '80%'
-  },
-  footerStatus: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  statusText: {
-    fontWeight: '800',
-    color: '#C7D2FE'
-  }
 });
