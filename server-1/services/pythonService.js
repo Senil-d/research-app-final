@@ -3,7 +3,8 @@ const path = require('path');
 
 const runPythonModel = (inputData) => {
   return new Promise((resolve, reject) => {
-    const py = spawn('python3', [path.join(__dirname, '../python/predictor.py')]);
+    // Use 'python' instead of 'python3' for Windows compatibility
+    const py = spawn('python', [path.join(__dirname, '../python/predictor.py')]);
 
     let output = '';
     let error = '';
@@ -19,9 +20,13 @@ const runPythonModel = (inputData) => {
       error += data.toString();
     });
 
+    py.on('error', (err) => {
+      reject(new Error(`Failed to start Python: ${err.message}`));
+    });
+
     py.on('close', (code) => {
       if (code !== 0) {
-        return reject(new Error(error));
+        return reject(new Error(`Python process failed with code ${code}: ${error}`));
       }
       try {
         resolve(JSON.parse(output));

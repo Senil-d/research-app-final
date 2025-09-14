@@ -10,13 +10,15 @@ const suggestCareer = async (req, res) => {
   const username = req.user.username;
 
   const pyPath = path.join(__dirname, '../python/predict_career/predict_career.py');
-  const python = spawn('python3', [pyPath]);
+  // Use 'python' instead of 'python3' for Windows compatibility
+  const python = spawn('python', [pyPath]);
 
   const input = JSON.stringify({ stream, specialization });
   python.stdin.write(input);
   python.stdin.end();
 
   let result = '';
+  let hasResponded = false; // Flag to prevent multiple responses
 
   python.stdout.on('data', data => {
     result += data.toString();
@@ -29,14 +31,30 @@ const suggestCareer = async (req, res) => {
 
   python.on('error', err => {
     console.error('Failed to start Python:', err);
-    return res.status(500).json({ error: 'Python execution error' });
+    if (!hasResponded) {
+      hasResponded = true;
+      return res.status(500).json({ error: 'Python execution error', detail: err.message });
+    }
   });
 
-  python.on('close', async () => {
+  python.on('close', async (code) => {
+    if (hasResponded) return; // Prevent duplicate responses
+    
     try {
+      if (code !== 0) {
+        hasResponded = true;
+        return res.status(500).json({ error: 'Python process failed', code });
+      }
+
+      if (!result.trim()) {
+        hasResponded = true;
+        return res.status(500).json({ error: 'No output from Python script' });
+      }
+
       const output = JSON.parse(result);
 
       if (output.error) {
+        hasResponded = true;
         return res.status(400).json({ error: output.error });
       }
 
@@ -50,6 +68,7 @@ const suggestCareer = async (req, res) => {
 
       await log.save();
 
+      hasResponded = true;
       res.json({
         career: output.predicted_career,
         user: {
@@ -59,7 +78,10 @@ const suggestCareer = async (req, res) => {
       });
     } catch (err) {
       console.error('❌ Failed to parse output or save log:', err.message);
-      res.status(500).json({ error: 'Prediction failed', detail: err.message });
+      if (!hasResponded) {
+        hasResponded = true;
+        res.status(500).json({ error: 'Prediction failed', detail: err.message });
+      }
     }
   });
 };
@@ -73,7 +95,8 @@ const getCareerRequiredSkills = async (req, res) => {
     }
 
     const pyPath = path.join(__dirname, '../python/predict_career/get_career_skills.py');
-    const python = spawn('python3', [pyPath]);
+    // Use 'python' instead of 'python3' for Windows compatibility
+    const python = spawn('python', [pyPath]);
 
     const input = { career };
     python.stdin.write(JSON.stringify(input));
@@ -81,6 +104,7 @@ const getCareerRequiredSkills = async (req, res) => {
 
     let result = '';
     let errorText = '';
+    let hasResponded = false; // Flag to prevent multiple responses
 
     python.stdout.on('data', (data) => {
       result += data.toString();
@@ -90,15 +114,42 @@ const getCareerRequiredSkills = async (req, res) => {
       errorText += data.toString();
     });
 
-    python.on('close', () => {
+    python.on('error', (err) => {
+      console.error('Failed to start Python:', err);
+      if (!hasResponded) {
+        hasResponded = true;
+        return res.status(500).json({ error: 'Python execution error', detail: err.message });
+      }
+    });
+
+    python.on('close', (code) => {
+      if (hasResponded) return; // Prevent duplicate responses
+      
       try {
+        if (code !== 0) {
+          hasResponded = true;
+          return res.status(500).json({
+            error: 'Python process failed',
+            detail: errorText || `Process exited with code ${code}`,
+          });
+        }
+
+        if (!result.trim()) {
+          hasResponded = true;
+          return res.status(500).json({ error: 'No output from Python script' });
+        }
+
         const parsed = JSON.parse(result);
+        hasResponded = true;
         return res.status(200).json(parsed);
       } catch (err) {
-        return res.status(500).json({
-          error: 'Failed to parse Python output',
-          detail: errorText || err.message,
-        });
+        if (!hasResponded) {
+          hasResponded = true;
+          return res.status(500).json({
+            error: 'Failed to parse Python output',
+            detail: errorText || err.message,
+          });
+        }
       }
     });
   } catch (error) {

@@ -15,6 +15,11 @@ import SuggestedCareerScreen from './screens/SuggestedCareerScreen';
 import Career from './screens/Career';
 import NavBar from './components/NavBar';
 import HomeScreen from './screens/HomeScreen';
+import AssessmentResults from './screens/artistic/AssessmentResults';
+import CareerAssessment from './screens/artistic/CareerAssessment';
+import CVClassification from './screens/artistic/CVClassification';
+import FinalScoreScreen from './screens/artistic/FinalScoreScreen';
+
 
 //Function 1
 import ResultScreen from './screens/ResultsScreen';
@@ -52,6 +57,18 @@ export default function App() {
 
         {/* Function 2 Screens */}
         <Stack.Screen name="QuizF2" component={QuizScreenF2} options={{ headerShown: false }} />
+
+
+        {/* artistic Screens */}
+        <Stack.Screen name="assresul" component={AssessmentResults} options={{ headerShown: false }} />
+        <Stack.Screen name="careerass" component={CareerAssessment} options={{ headerShown: false }} />
+        <Stack.Screen name="cv" component={CVClassification} options={{ headerShown: false }} />
+        <Stack.Screen name="finalscore" component={FinalScoreScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="score" component={AssessmentResults} options={{ headerShown: false }} />
+
+
+
+
 
 
         <Stack.Screen name='home' component={HomeScreen} options={{ headerShown: false }}/>

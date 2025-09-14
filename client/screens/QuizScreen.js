@@ -29,7 +29,7 @@ const QuizScreen = ({ route }) => {
     const loadQuestions = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const res = await axios.get(`http://192.168.8.120:5050/api/quiz`, {
+        const res = await axios.get(`http://192.168.54.44:5050/api/quiz`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
