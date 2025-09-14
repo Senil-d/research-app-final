@@ -3,6 +3,8 @@ const cors = require('cors');
 const morgan = require('morgan');
 const colors = require('colors');
 const connectDB = require('./config/db');
+require("dotenv").config();
+
 
 // Routes
 const quizRoutes = require('./routes/quizRoutes'); 
@@ -11,7 +13,11 @@ const careerRoutes = require('./routes/careerRoute');
 const quizResultRoutes = require('./routes/quizRoutes');
 const validateAnswerRoutes = require('./routes/quizRoutes');
 
+//Roadmap
+const resourceRoutes = require('./routes/roadMapRoutes');
+
 const app = express();
+
 
 // Middlewares
 app.use(cors());
@@ -24,13 +30,22 @@ app.use('/api/auth', authRoutes);
 
 //Function-1(Problem Solving)
 app.use('/api', quizRoutes);
-app.use('/api/quiz-results', quizResultRoutes);
+app.use('/api/results', quizResultRoutes);
 app.use('/api/answersQuiz', validateAnswerRoutes);
 
 app.use('/api/career', careerRoutes);
 
 //Function-2()
 app.use('/f2-api', quizRoutes);
+
+//Function-3()
+
+
+//Function-4()
+
+
+//Roadmap
+app.use("/api/resources", resourceRoutes);
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
