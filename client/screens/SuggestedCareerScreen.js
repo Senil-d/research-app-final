@@ -1,15 +1,14 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Alert,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { EXPO_PUBLIC_BASE_URL } from "@env";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 
@@ -33,7 +32,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Save selected career
       await axios.post(
-        `http://192.168.8.120:5050/api/career/save-selection`,
+        `http://192.168.8.105:5050/api/career/save-selection`,
         {
           selectedCareer: career,
           stream,
@@ -48,7 +47,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Get career skill info
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/career-skills`,
+        `http://192.168.8.105:5050/api/career/career-skills`,
         { career },
         {
           headers: {

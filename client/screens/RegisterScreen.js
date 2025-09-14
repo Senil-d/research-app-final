@@ -1,17 +1,16 @@
+import axios from 'axios';
+import LottieView from 'lottie-react-native';
 import React, { useState } from 'react';
 import {
-  View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform
+  TouchableOpacity
 } from 'react-native';
-import axios from 'axios';
 import * as Animatable from 'react-native-animatable';
-import LottieView from 'lottie-react-native';
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -20,7 +19,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     try {
-      await axios.post(`http://192.168.8.120:5050/api/auth/register`, {
+      await axios.post(`http://192.168.8.105:5050/api/auth/register`, {
         username,
         email,
         password,

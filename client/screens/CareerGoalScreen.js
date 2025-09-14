@@ -1,19 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Slider from '@react-native-community/slider';
+import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
+  Alert,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  Dimensions,
+  View,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 import * as Animatable from 'react-native-animatable';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import Navbar from '../components/NavBar';
-import { EXPO_PUBLIC_BASE_URL } from '@env';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -78,7 +77,7 @@ export default function CareerGoalScreen({ navigation }) {
       }
 
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/suggest-career`,
+        `http://192.168.8.105:5050/api/career/suggest-career`,
         { stream, specialization: goal, knowledge },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +106,7 @@ export default function CareerGoalScreen({ navigation }) {
         <Text style={styles.title}>Skill To Career</Text>
         <View style={styles.currency}>
           <Text style={styles.coin}>🪙</Text>
-          <Text style={styles.coinText}>{Math.round(progress * 120)}</Text>
+          <Text style={styles.coinText}>{Math.round(progress * 105)}</Text>
         </View>
       </View>
 
@@ -296,7 +295,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0ea5e9', opacity: 0.09,
   },
   bgOrbB: {
-    position: 'absolute', bottom: -120, left: -80, width: ORB, height: ORB, borderRadius: ORB,
+    position: 'absolute', bottom: -105, left: -80, width: ORB, height: ORB, borderRadius: ORB,
     backgroundColor: '#10b981', opacity: 0.08,
   },
   header: { paddingHorizontal: 20, paddingTop: 25, paddingBottom: 8 },
