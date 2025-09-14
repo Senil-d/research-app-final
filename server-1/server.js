@@ -11,6 +11,7 @@ const careerRoutes = require('./routes/careerRoute');
 const quizResultRoutes = require('./routes/quizRoutes');
 const validateAnswerRoutes = require('./routes/quizRoutes');
 
+
 const app = express();
 
 // Middlewares
@@ -30,7 +31,12 @@ app.use('/api/answersQuiz', validateAnswerRoutes);
 app.use('/api/career', careerRoutes);
 
 //Function-2()
-app.use('/f2-api', quizRoutes);
+ app.use('/f2-api', quizRoutes);
+;
+
+ //app.use('api/analyticalAssess', analyticalAssessRoute)
+
+
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
