@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { BASE_URL } from "../config/apiConfig";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -28,7 +29,7 @@ const ResultScreen = ({ navigation }) => {
           return;
         }
 
-        const res = await axios.get("http://192.168.8.120:5050/api/results", {
+        const res = await axios.get(`${BASE_URL}/api/results`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

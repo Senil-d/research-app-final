@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { EXPO_PUBLIC_BASE_URL } from '@env'; // ✅ USE .env FOR CONSISTENT BASE URL
+
 
 const ScoreScreen = ({ route, navigation }) => {
   const { score, total } = route.params;

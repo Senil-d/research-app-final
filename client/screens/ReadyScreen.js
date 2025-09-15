@@ -1,7 +1,7 @@
 // screens/ReadyScreen.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { EXPO_PUBLIC_BASE_URL } from '@env'; // ✅ USE .env FOR CONSISTENT BASE URL
+
 
 const ReadyScreen = ({ navigation, route }) => {
   const { level, user } = route.params;

@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import * as Animatable from 'react-native-animatable';
 import LottieView from 'lottie-react-native';
+import { BASE_URL } from '../config/apiConfig';
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -20,7 +21,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     try {
-      await axios.post(`http://192.168.8.120:5050/api/auth/register`, {
+      await axios.post(`${BASE_URL}/api/auth/register`, {
         username,
         email,
         password,

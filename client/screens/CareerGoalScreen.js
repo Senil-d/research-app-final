@@ -13,7 +13,7 @@ import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Navbar from '../components/NavBar';
-import { EXPO_PUBLIC_BASE_URL } from '@env';
+import { BASE_URL } from '../config/apiConfig';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -78,7 +78,7 @@ export default function CareerGoalScreen({ navigation }) {
       }
 
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/suggest-career`,
+        `${BASE_URL}/api/career/suggest-career`,
         { stream, specialization: goal, knowledge },
         { headers: { Authorization: `Bearer ${token}` } }
       );

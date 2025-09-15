@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
+import { BASE_URL } from '../config/apiConfig';
 
 const QuizScreen = ({ route }) => {
   const { level = 'Beginner' } = route?.params || {};
@@ -29,7 +30,7 @@ const QuizScreen = ({ route }) => {
     const loadQuestions = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const res = await axios.get(`http://192.168.8.120:5050/api/quiz`, {
+        const res = await axios.get(`${BASE_URL}/api/quiz`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -67,7 +68,7 @@ const QuizScreen = ({ route }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/evaluate`,
+        `${BASE_URL}/api/evaluate`,
         { answers: formattedAnswers },
         {
           headers: {

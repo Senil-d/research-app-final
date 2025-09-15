@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { EXPO_PUBLIC_BASE_URL } from "@env";
+import { BASE_URL } from "../config/apiConfig";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 
@@ -33,7 +33,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Save selected career
       await axios.post(
-        `http://192.168.8.120:5050/api/career/save-selection`,
+        `${BASE_URL}/api/career/save-selection`,
         {
           selectedCareer: career,
           stream,
@@ -48,7 +48,7 @@ const SuggestedCareerScreen = ({ route, navigation }) => {
 
       // Get career skill info
       const res = await axios.post(
-        `http://192.168.8.120:5050/api/career/career-skills`,
+        `${BASE_URL}/api/career/career-skills`,
         { career },
         {
           headers: {

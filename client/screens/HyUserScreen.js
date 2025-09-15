@@ -12,7 +12,7 @@ import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import LottieView from 'lottie-react-native';
-import { EXPO_PUBLIC_BASE_URL } from '@env';
+import { BASE_URL } from '../config/apiConfig';
 import Header from '../components/Header';
 import NavBar from '../components/NavBar';
 
@@ -32,7 +32,7 @@ const HyUserScreen = () => {
         setLoading(false);
         return;
       }
-      const response = await axios.get(`http://192.168.8.120:5050/api/auth/get-user`, {
+      const response = await axios.get(`${BASE_URL}/api/auth/get-user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

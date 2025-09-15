@@ -13,7 +13,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
 import LoadingScreen from './LoadingScreen';
-import { EXPO_PUBLIC_BASE_URL } from '@env';
+import { BASE_URL } from '../config/apiConfig';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`http://192.168.8.191:5050/api/auth/login`, {
+      const res = await axios.post(`${BASE_URL}/api/auth/login`, {
         username,
         password,
       });
