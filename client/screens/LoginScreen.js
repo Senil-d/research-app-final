@@ -1,19 +1,17 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   Alert,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity
 } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
 import LoadingScreen from './LoadingScreen';
-import { EXPO_PUBLIC_BASE_URL } from '@env';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -27,7 +25,7 @@ const LoginScreen = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      const res = await axios.post(`http://192.168.8.120:5050/api/auth/login`, {
+      const res = await axios.post(`http://192.168.8.105:5050/api/auth/login`, {
         username,
         password,
       });

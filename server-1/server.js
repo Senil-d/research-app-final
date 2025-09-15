@@ -36,16 +36,12 @@ app.use('/api/answersQuiz', validateAnswerRoutes);
 app.use('/api/career', careerRoutes);
 
 //Function-2()
-app.use('/f2-api', quizRoutes);
+ app.use('/f2-api', quizRoutes);
+;
 
-//Function-3()
-
-
-//Function-4()
+ //app.use('api/analyticalAssess', analyticalAssessRoute)
 
 
-//Roadmap
-app.use("/api/resources", resourceRoutes);
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {

@@ -18,7 +18,7 @@ router.get("/results", protect, getUserResults);
 // router.post('/validate-answers', protect, validateAnswers);
 
 //Function-2()
-router.get('/quiz-f2', protect, getF2QuizQuestions);
+router.get('/quiz-f2', getF2QuizQuestions);
 router.post('/quiz-f2/evaluate-f2', evaluateQuizF2);
 
 module.exports = router;

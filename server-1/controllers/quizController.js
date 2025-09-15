@@ -1,7 +1,8 @@
 const QuizResult = require('../model(user)/QuizResult');
 const User = require('../model(user)/userModel');
 const Question = require('../model(user)/QuestionModel');
-const jwt = require("jsonwebtoken");
+const express = require("express");
+const router = express.Router();const jwt = require("jsonwebtoken");
 
 // const path = require('path');
 // const { spawn } = require('child_process');
@@ -51,6 +52,8 @@ const jwt = require("jsonwebtoken");
 
 const path = require('path');
 const { spawn } = require('child_process');
+
+
 
 let latestQuiz = [];
 
@@ -280,69 +283,47 @@ const getUserResults = async (req, res) => {
 
 //Function-2()
 
-const getF2QuizQuestions = (req, res) => {
-  const pyPath = path.join(__dirname, '../../model-f2/run/quiz_generator.py');
-  const python = spawn('python3', [pyPath], { encoding: 'utf8' });
+// === Function-2 (F2 Quiz) ===
 
-  let data = '';
-  python.stdout.on('data', (chunk) => {
+const getF2QuizQuestions = (req, res) => {
+  const python = spawn("python3", [path.join(__dirname, "../../model-f2/quiz_generator.py")]);
+  let data = "";
+
+  python.stdout.on("data", (chunk) => {
     data += chunk.toString();
   });
 
-  python.stderr.on('data', (err) => {
-    console.error('❌ Python stderr:', err.toString());
+  python.stderr.on("data", (err) => {
+    console.error("❌ Python stderr:", err.toString());
   });
 
-  python.on('close', (code) => {
-    console.log('✅ Python stdout result:', data);
-    if (!data || data.trim() === '') {
-      console.error('❌ Python script returned empty output');
-      return res.status(500).json({ error: 'Quiz generation failed: Empty output' });
-    }
+  python.on("close", () => {
+    console.log("✅ Python stdout result:", data);
 
     try {
-      const output = JSON.parse(data);
-      res.json(output);
+      res.json(JSON.parse(data));
     } catch (e) {
-      console.error('❌ JSON parse error:', e);
-      console.error('❌ Raw output was:', data);
-      res.status(500).json({ error: 'Quiz generation failed: Invalid JSON output' });
+      console.error("❌ JSON parse error:", e);
+      res.status(500).json({ error: "Quiz generation failed" });
     }
   });
 };
 
 const evaluateQuizF2 = (req, res) => {
-  const pyPath = path.join(__dirname, '../../model-f2/run/evaluator.py');
-  const python = spawn('python3', [pyPath], { encoding: 'utf8' });
+  const python = spawn("python3", [path.join(__dirname, "../../model-f2/evaluator.py")]);
 
-  // Send answers to Python script via stdin
-  const input = JSON.stringify({ answers: req.body.answers });
-  python.stdin.write(input);
+  python.stdin.write(JSON.stringify({ answers: req.body.answers }));
   python.stdin.end();
 
-  let result = '';
-  python.stdout.on('data', (chunk) => {
-    result += chunk.toString();
-  });
+  let result = "";
+  python.stdout.on("data", (chunk) => (result += chunk.toString()));
+  python.stderr.on("data", (err) => console.error("Evaluation Error:", err.toString()));
 
-  python.stderr.on('data', (err) => {
-    console.error('❌ Python stderr:', err.toString());
-  });
-
-  python.on('close', (code) => {
-    console.log('✅ Python stdout result:', result);
-    if (!result || result.trim() === '') {
-      console.error('❌ Python script returned empty output');
-      return res.status(500).json({ error: 'Evaluation failed: Empty output' });
-    }
-
+  python.on("close", () => {
     try {
-      const output = JSON.parse(result);
-      res.json(output);
-    } catch (e) {
-      console.error('❌ JSON parse error:', e);
-      console.error('❌ Raw output was:', result);
-      res.status(500).json({ error: 'Evaluation failed: Invalid JSON output' });
+      res.json(JSON.parse(result));
+    } catch {
+      res.status(500).json({ error: "Evaluation failed" });
     }
   });
 };

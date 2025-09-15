@@ -6,7 +6,7 @@ import os
 from sklearn.preprocessing import LabelEncoder
 
 # === Load Data ===
-csv_path = os.path.join(os.path.dirname(__file__), '../data/skill_assessment_questions_full.csv')
+csv_path = os.path.join(os.path.dirname(__file__), 'skill_assessment_questions_full.csv')
 df = pd.read_csv(csv_path)
 
 # === Clean & Prepare Data ===
@@ -39,7 +39,7 @@ df = df.reset_index(drop=True)
 df["question_id"] = df.index + 1  # Start IDs from 
 
 # === Save Trained Data as Model ===
-output_path = os.path.join(os.path.dirname(__file__), '../data/skill_assessment_model.pkl')
+output_path = os.path.join(os.path.dirname(__file__), 'skill_assessment_model.pkl')
 with open(output_path, 'wb') as f:
     dill.dump(df, f)
 

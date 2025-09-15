@@ -29,7 +29,7 @@ const QuizSectionScreen = () => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('http://10.114.101.73:5050/api/quiz-f2');
+      const response = await axios.get('http://192.168.8.105:5050/api/quiz-f2');
       const filtered = response.data.filter(q => q.category === category);
       setQuestions(filtered.slice(0, 5));
     } catch (err) {
@@ -72,7 +72,7 @@ const QuizSectionScreen = () => {
       } else {
         // ✅ Submit to backend after last category
         try {
-          const res = await axios.post('http://10.114.101.73:5050/api/quiz-f2/evaluate-f2', {
+          const res = await axios.post('http://192.168.8.105:5050/api/quiz-f2/evaluate-f2', {
             answers: updatedAnswers,
           });
         

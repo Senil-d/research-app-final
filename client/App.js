@@ -1,20 +1,20 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 
 // Screens
-import LandingScreen from './screens/LandingScreen';
-import HyUserScreen from './screens/HyUserScreen';
-import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
-import WelcomeGuideScreen from './screens/WelcomeGuideScreen';
-import CareerGoalScreen from './screens/CareerGoalScreen';
 import Header from './components/Header';
-import ReadyScreen from './screens/ReadyScreen';
-import SuggestedCareerScreen from './screens/SuggestedCareerScreen';
-import Career from './screens/Career';
 import NavBar from './components/NavBar';
+import Career from './screens/Career';
+import CareerGoalScreen from './screens/CareerGoalScreen';
 import HomeScreen from './screens/HomeScreen';
+import HyUserScreen from './screens/HyUserScreen';
+import LandingScreen from './screens/LandingScreen';
+import LoginScreen from './screens/LoginScreen';
+import ReadyScreen from './screens/ReadyScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import SuggestedCareerScreen from './screens/SuggestedCareerScreen';
+import WelcomeGuideScreen from './screens/WelcomeGuideScreen';
 
 //roadmap
 import LandMapScreen from './screens/Roadmap/LandMapScreen';
@@ -31,11 +31,12 @@ import Lv10Screen from './screens/Roadmap/Levels/Lv10Screen';
 
 
 //Function 1
-import ResultScreen from './screens/ResultsScreen';
 import QuizScreen from './screens/QuizScreen';
+import ResultScreen from './screens/ResultsScreen';
 import ScoreScreen from './screens/ScoreScreen';
 
 //Function 2
+import QuizResultScreen from './screens/Function-2/QuizResultScreen';
 import QuizScreenF2 from './screens/Function-2/QuizScreenF2';
 
 
@@ -44,7 +45,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Landing">
+      <Stack.Navigator initialRouteName="QuizF2">
         {/*App starting Screens*/}
         <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="WelcomeGuideScreen" component={WelcomeGuideScreen} options={{ headerShown: false }} />
@@ -67,6 +68,7 @@ export default function App() {
 
         {/* Function 2 Screens */}
         <Stack.Screen name="QuizF2" component={QuizScreenF2} options={{ headerShown: false }} />
+        <Stack.Screen name='QuizResultScreen' component={QuizResultScreen} options={{ headerShown: false }}/>
 
 
         <Stack.Screen name='home' component={HomeScreen} options={{ headerShown: false }}/>
