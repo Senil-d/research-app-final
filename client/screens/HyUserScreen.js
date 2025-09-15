@@ -32,7 +32,7 @@ const HyUserScreen = () => {
         setLoading(false);
         return;
       }
-      const response = await axios.get(`${BASE_URL}/api/auth/get-user`, {
+      const response = await axios.get(`http://192.168.1.30:5050/api/auth/get-user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

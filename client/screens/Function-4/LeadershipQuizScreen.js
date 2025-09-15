@@ -9,15 +9,16 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-import LeadershipQuestionCard from '../components/LeadershipQuestionCard';
-import RoleplayDialog from '../components/RoleplayDialog';
-import DragAndDropSorter from '../components/DragAndDropSorter';
-import TimedProgressCircle from '../components/TimedProgressCircle';
-import MicrocopyBanner from '../components/MicrocopyBanner';
-import QuitConfirmationModal from '../components/QuitConfirmationModal';
+import LeadershipQuestionCard from '../../components/LeadershipAssessComponents/LeadershipQuestionCard';
+import RoleplayDialog from '../../components/LeadershipAssessComponents/RoleplayDialog';
+import DragAndDropSorter from '../../components/LeadershipAssessComponents/DragAndDropSorter';
+import TimedProgressCircle from '../../components/LeadershipAssessComponents/TimedProgressCircle';
+import MicrocopyBanner from '../../components/LeadershipAssessComponents/MicrocopyBanner';
+import QuitConfirmationModal from '../../components/LeadershipAssessComponents/QuitConfirmationModal';
 import LottieView from 'lottie-react-native';
+import { BASE_URL } from '../../config/apiConfig';
 
-const API_BASE = 'http://localhost:5050/api/leadership';
+const API_BASE = `http://192.168.1.30:5050/api/leadership`;
 
 const LeadershipQuizScreen = ({ navigation, route }) => {
   const { userId, career } = route.params;

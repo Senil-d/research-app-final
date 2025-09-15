@@ -159,6 +159,10 @@ const Career = () => {
         skillValue: value,
         career: skillInfo.career,
       });
+    } else if (skill === "Leadership") {
+      navigation.navigate("LeadershipQuiz", {
+        career: skillInfo.career,
+      });
     } else {
       Alert.alert("Not Available", `Quiz for "${skill}" is not yet available.`);
     }

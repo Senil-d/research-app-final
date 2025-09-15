@@ -30,7 +30,7 @@ const QuizScreen = ({ route }) => {
     const loadQuestions = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const res = await axios.get(`${BASE_URL}/api/quiz`, {
+        const res = await axios.get(`http://192.168.1.30:5050/api/quiz`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -68,7 +68,7 @@ const QuizScreen = ({ route }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const res = await axios.post(
-        `${BASE_URL}/api/evaluate`,
+        `http://192.168.1.30:5050/api/evaluate`,
         { answers: formattedAnswers },
         {
           headers: {

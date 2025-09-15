@@ -29,7 +29,7 @@ const ResultScreen = ({ navigation }) => {
           return;
         }
 
-        const res = await axios.get(`${BASE_URL}/api/results`, {
+        const res = await axios.get(`http://192.168.1.30:5050/api/results`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
